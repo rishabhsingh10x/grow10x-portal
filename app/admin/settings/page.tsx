@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { storage, User } from "@/lib/services/storage"
-import { SystemSettings, DEFAULT_SETTINGS } from "@/lib/types/settings"
+import { supabaseService, User, SystemSettings } from "@/lib/services/supabase-service"
+import { DEFAULT_SETTINGS } from "@/lib/types/settings"
 import { Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -25,59 +25,46 @@ export default function AdminSettingsPage() {
     const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
 
     useEffect(() => {
-        setSettings(storage.getSettings());
-        const currentUser = storage.getCurrentUser();
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        const s = await supabaseService.getSettings();
+        setSettings(s);
+        const currentUser = supabaseService.getCurrentUser();
         if (currentUser) {
             setAdmin(currentUser);
             setPhone(currentUser.phone || "");
         }
-    }, []);
-
-    const handleSaveSettings = () => {
-        setLoading(true);
-        setTimeout(() => {
-            storage.updateSettings(settings);
-            setSuccess("Settings updated successfully!");
-            setLoading(false);
-            setTimeout(() => setSuccess(""), 3000);
-        }, 500);
     }
 
-    const handleUpdateProfile = () => {
+    const handleSaveSettings = async () => {
+        setLoading(true);
+        const ok = await supabaseService.updateSettings(settings);
+        if (ok) {
+            setSuccess("Settings updated successfully!");
+            setTimeout(() => setSuccess(""), 3000);
+        }
+        setLoading(false);
+    }
+
+    const handleUpdateProfile = async () => {
         if (!admin) return;
         setLoading(true);
         setProfileMsg({ type: '', text: '' });
 
         try {
             const updatedUser = { ...admin, phone };
+            const ok = await supabaseService.updateEmployee(updatedUser);
 
-            // Password change logic
-            if (newPassword) {
-                if (newPassword !== confirmPassword) {
-                    setProfileMsg({ type: 'error', text: "New passwords do not match." });
-                    setLoading(false);
-                    return;
-                }
-                if (admin.password !== currentPassword.trim()) {
-                    setProfileMsg({ type: 'error', text: "Incorrect current password." });
-                    setLoading(false);
-                    return;
-                }
-                updatedUser.password = newPassword.trim();
+            if (ok) {
+                setAdmin(updatedUser);
+                setProfileMsg({ type: 'success', text: "Profile updated successfully!" });
+            } else {
+                setProfileMsg({ type: 'error', text: "Failed to update profile." });
             }
-
-            storage.updateUser(updatedUser);
-            localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
-            setAdmin(updatedUser);
-
-            // Clear password fields
-            setCurrentPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-
-            setProfileMsg({ type: 'success', text: "Profile updated successfully!" });
         } catch (err) {
-            setProfileMsg({ type: 'error', text: "Failed to update profile." });
+            setProfileMsg({ type: 'error', text: "Error updating profile." });
         } finally {
             setLoading(false);
         }

@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { storage } from "@/lib/services/storage"
-import { Holiday } from "@/lib/types/holiday"
+import { supabaseService, Holiday } from "@/lib/services/supabase-service"
 import {
     Table,
     TableBody,
@@ -46,29 +45,30 @@ export default function AdminHolidaysPage() {
         loadHolidays();
     }, []);
 
-    const loadHolidays = () => {
-        setHolidays(storage.getHolidays());
+    const loadHolidays = async () => {
+        const data = await supabaseService.getHolidays();
+        setHolidays(data);
     }
 
     const handleAdd = async () => {
         if (!name || !date) return;
-        const newHoliday: any = {
-            id: Math.random().toString(36).substr(2, 9),
+        const success = await supabaseService.addHoliday({
             name,
             date,
-            type
-        };
-        await storage.addHoliday(newHoliday);
-        loadHolidays();
-        setIsDialogOpen(false);
-        setName("");
-        setDate("");
+            type: type as any
+        });
+        if (success) {
+            await loadHolidays();
+            setIsDialogOpen(false);
+            setName("");
+            setDate("");
+        }
     }
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm("Delete this holiday?")) {
-            storage.deleteHoliday(id);
-            loadHolidays();
+            await supabaseService.deleteHoliday(id);
+            await loadHolidays();
         }
     }
 

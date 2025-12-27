@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { AttendanceSummaryChart } from "@/components/reports/attendance-summary-chart"
 import { PerformanceSummaryChart } from "@/components/reports/performance-summary-chart"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { storage } from "@/lib/services/storage"
+import { supabaseService, User, AttendanceRecord, PerformanceRecord } from "@/lib/services/supabase-service"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,19 +14,28 @@ import { PerformanceDeepDive } from "@/components/reports/performance-deep-dive"
 import { LeaveReport } from "@/components/reports/leave-report"
 
 export default function ReportsPage() {
-    const [attendanceData, setAttendanceData] = useState<any[]>([]);
-    const [performanceData, setPerformanceData] = useState<any[]>([]);
+    const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
+    const [performanceData, setPerformanceData] = useState<PerformanceRecord[]>([]);
+    const [employees, setEmployees] = useState<User[]>([]);
 
     useEffect(() => {
-        // Load all data
-        setAttendanceData(storage.getAttendanceRecords());
-        setPerformanceData(storage.getPerformanceRecords());
+        const loadAllData = async () => {
+            const [att, perf, emps] = await Promise.all([
+                supabaseService.getAttendance(),
+                supabaseService.getPerformanceRecords(),
+                supabaseService.getEmployees()
+            ]);
+            setAttendanceData(att);
+            setPerformanceData(perf);
+            setEmployees(emps);
+        }
+        loadAllData();
     }, []);
 
     // Stats Calculation
-    const totalEmployees = storage.getUsers().filter(u => u.role === 'employee').length;
-    const totalLeads = performanceData.reduce((acc, curr) => acc + Number(curr.leadsAssigned), 0);
-    const totalConversions = performanceData.reduce((acc, curr) => acc + Number(curr.conversions), 0);
+    const totalEmployees = employees.filter(u => u.role === 'employee').length;
+    const totalLeads = performanceData.reduce((acc, curr) => acc + Number(curr.leadsAssigned || 0), 0);
+    const totalConversions = performanceData.reduce((acc, curr) => acc + Number(curr.conversions || 0), 0);
     const conversionRate = totalLeads > 0 ? ((totalConversions / totalLeads) * 100).toFixed(1) : "0.0";
 
     return (

@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { DailyUpdateCard } from "@/components/performance/daily-update-card"
 import { PerformanceTable } from "@/components/performance/performance-table"
-import { storage } from "@/lib/services/storage"
-import { PerformanceRecord } from "@/lib/types/performance"
+import { supabaseService, PerformanceRecord } from "@/lib/services/supabase-service"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function EmployeePerformancePage() {
@@ -14,10 +13,11 @@ export default function EmployeePerformancePage() {
         loadData();
     }, [])
 
-    const loadData = () => {
-        const user = storage.getCurrentUser();
+    const loadData = async () => {
+        const user = supabaseService.getCurrentUser();
         if (user) {
-            setMyData(storage.getEmployeePerformance(user.id));
+            const data = await supabaseService.getPerformanceRecords(user.id);
+            setMyData(data);
         }
     }
 

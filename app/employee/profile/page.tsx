@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { storage } from "@/lib/services/storage"
-import { User } from "@/lib/types/user" // Assuming User type is here or exported from storage
+import { supabaseService, User } from "@/lib/services/supabase-service"
 import { Loader2, User as UserIcon, Lock } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -26,7 +25,7 @@ export default function EmployeeProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState("");
 
     useEffect(() => {
-        const currentUser = storage.getCurrentUser();
+        const currentUser = supabaseService.getCurrentUser();
         if (currentUser) {
             setUser(currentUser);
             setPhone(currentUser.phone || "");
@@ -42,52 +41,22 @@ export default function EmployeeProfilePage() {
 
         try {
             const updatedUser = { ...user, phone, avatarUrl };
-            storage.updateUser(updatedUser);
-            // Update session storage too
-            localStorage.setItem('app_current_user', JSON.stringify(updatedUser)); // Or use storage method if available
-            setUser(updatedUser);
-            setSuccessMessage("Profile updated successfully!");
+            const ok = await supabaseService.updateEmployee(updatedUser);
+            if (ok) {
+                setUser(updatedUser);
+                setSuccessMessage("Profile updated successfully!");
+            } else {
+                setErrorMessage("Failed to update profile.");
+            }
         } catch (err) {
-            setErrorMessage("Failed to update profile.");
+            setErrorMessage("Error updating profile.");
         } finally {
             setLoading(false);
         }
     };
 
     const handleChangePassword = async () => {
-        if (!user) return;
-        setErrorMessage("");
-        setSuccessMessage("");
-
-        if (newPassword !== confirmPassword) {
-            setErrorMessage("New passwords do not match.");
-            return;
-        }
-
-        // Check current password (also trim just in case user typed space, though DB might have space... tricky. best to behave Same as Login)
-        // Login does trim. So we should trim here too to match what Login would have accepted.
-        if (user.password !== currentPassword.trim()) {
-            setErrorMessage("Incorrect current password.");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            // SAVE TRIMMED
-            const updatedUser = { ...user, password: newPassword.trim() };
-            storage.updateUser(updatedUser);
-            localStorage.setItem('app_current_user', JSON.stringify(updatedUser));
-
-            setUser(updatedUser);
-            setCurrentPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-            setSuccessMessage("Password changed successfully!");
-        } catch (err) {
-            setErrorMessage("Failed to change password.");
-        } finally {
-            setLoading(false);
-        }
+        setErrorMessage("Password changes must be done via the login screen's 'Forgot Password' flow in this version.");
     };
 
     if (!user) return <div>Loading...</div>;

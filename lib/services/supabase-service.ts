@@ -335,6 +335,53 @@ export const supabaseService = {
             ...settings
         })
         return !error
+    },
+
+    // --- HOLIDAYS ---
+    getHolidays: async (): Promise<Holiday[]> => {
+        const { data, error } = await supabase.from('holidays').select('*').order('date')
+        if (error) return []
+        return data as Holiday[]
+    },
+
+    addHoliday: async (holiday: Omit<Holiday, 'id'>): Promise<boolean> => {
+        const { error } = await supabase.from('holidays').insert([holiday])
+        return !error
+    },
+
+    deleteHoliday: async (id: string): Promise<boolean> => {
+        const { error } = await supabase.from('holidays').delete().eq('id', id)
+        return !error
+    },
+
+    // --- PERFORMANCE ---
+    getPerformanceRecords: async (employeeId?: string): Promise<PerformanceRecord[]> => {
+        let query = supabase.from('performance').select('*')
+        if (employeeId) query = query.eq('user_id', employeeId)
+
+        const { data, error } = await query.order('date', { ascending: false })
+        if (error) return []
+
+        return data.map(r => ({
+            id: r.id,
+            employeeId: r.user_id,
+            employeeName: '', // Handled by frontend or join
+            date: r.date,
+            leadsAssigned: r.leads_assigned,
+            prospectsContacted: r.prospects_contacted,
+            conversions: r.conversions,
+            remarks: r.remarks,
+            country: r.country
+        }))
+    },
+
+    getPerformanceStatistics: async (employeeId?: string) => {
+        // Placeholder for real stats
+        return {
+            averageHours: 8.5,
+            lateDays: 2,
+            onTimeRate: 92
+        }
     }
 }
 

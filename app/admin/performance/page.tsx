@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import { PerformanceTable } from "@/components/performance/performance-table"
 import { AssignLeadsDialog } from "@/components/performance/assign-leads-dialog"
-import { storage } from "@/lib/services/storage"
-import { PerformanceRecord } from "@/lib/types/performance"
+import { supabaseService, PerformanceRecord } from "@/lib/services/supabase-service"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -18,8 +17,9 @@ export default function AdminPerformancePage() {
         loadData();
     }, [])
 
-    const loadData = () => {
-        setData(storage.getPerformanceRecords());
+    const loadData = async () => {
+        const d = await supabaseService.getPerformanceRecords();
+        setData(d);
     }
 
     const filteredData = data.filter(d =>
