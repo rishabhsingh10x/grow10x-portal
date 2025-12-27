@@ -21,8 +21,7 @@ export const supabaseService = {
         })
 
         if (authError || !authUser) {
-            console.error('Login error:', authError)
-            return null
+            throw new Error(authError?.message || 'Invalid email or password.');
         }
 
         // Fetch additional profile data
@@ -30,11 +29,15 @@ export const supabaseService = {
             .from('profiles')
             .select('*')
             .eq('id', authUser.id)
-            .single()
+            .maybeSingle() // Use maybeSingle to handle no-profile case gracefully
 
-        if (profileError || !profile) {
+        if (profileError) {
             console.error('Profile fetch error:', profileError)
-            return null
+            throw new Error('Database error while fetching profile: ' + profileError.message);
+        }
+
+        if (!profile) {
+            throw new Error('Login successful, but no account record found in "profiles" table. Please ensure the admin user is added to the profiles table.');
         }
 
         const user: User = {
