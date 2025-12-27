@@ -29,13 +29,9 @@ export default function LoginPage() {
                 } else {
                     router.push("/employee/dashboard");
                 }
-            } else {
-                // If login fails, we need to know why
-                setError("Login failed. Please check your credentials. If they are correct, ensure your account exists in BOTH 'Authentication' and 'Profiles' table in Supabase.");
-                setLoading(false);
             }
         } catch (err: any) {
-            setError(err.message || "Connection failed. Check your network or Supabase settings.");
+            setError(err.message || "An unexpected error occurred.");
             setLoading(false);
         }
     }
