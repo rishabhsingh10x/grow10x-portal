@@ -9,24 +9,10 @@ export type { User };
 
 // Initial Data
 const INITIAL_USERS: User[] = [
-    { id: 'admin1', employeeId: 'ADM001', name: 'System Admin', email: 'admin@company.com', role: 'admin', department: 'IT', status: 'Active', password: 'admin', workType: 'Full-time', joiningDate: '2023-01-01' },
-    { id: 'emp1', employeeId: 'EMP001', name: 'Alice Johnson', email: 'employee@company.com', role: 'employee', department: 'Sales', status: 'Active', password: 'employee', phone: '+1 234 567 890', workType: 'Full-time', joiningDate: '2023-06-15' },
-    { id: 'emp2', employeeId: 'EMP002', name: 'Bob Smith', email: 'bob@company.com', role: 'employee', department: 'Marketing', status: 'Active', password: 'password', phone: '+1 234 567 891', workType: 'Part-time', joiningDate: '2023-07-20' },
-    { id: 'emp3', employeeId: 'EMP003', name: 'Charlie Brown', email: 'charlie@company.com', role: 'employee', department: 'Sales', status: 'Inactive', password: 'password', phone: '+1 234 567 892', workType: 'Intern', joiningDate: '2023-08-01' },
+    // { id: 'admin1', employeeId: 'ADM001', name: 'System Admin', email: 'admin@company.com', role: 'admin', department: 'IT', status: 'Active', password: 'admin', workType: 'Full-time', joiningDate: '2023-01-01' },
 ];
 
-const INITIAL_PERFORMANCE: PerformanceRecord[] = [
-    {
-        id: "1",
-        employeeId: "emp1",
-        employeeName: "Alice Johnson",
-        date: new Date().toISOString().split('T')[0],
-        leadsAssigned: 20,
-        prospectsContacted: 15,
-        conversions: 2,
-        remarks: "Good progress",
-    }
-];
+const INITIAL_PERFORMANCE: PerformanceRecord[] = [];
 
 // LocalStorage Keys
 const STORAGE_KEYS = {
@@ -39,43 +25,7 @@ const STORAGE_KEYS = {
     CURRENT_USER: 'app_current_user'
 };
 
-const INITIAL_LEAVES: LeaveRequest[] = [
-    {
-        id: "leave1",
-        employeeId: "emp1",
-        employeeName: "Alice Johnson",
-        type: "Casual Leave",
-        fromDate: new Date().toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0],
-        reason: "Personal appointment",
-        status: "Pending",
-        appliedOn: new Date().toISOString().split('T')[0]
-    },
-    {
-        id: "leave2",
-        employeeId: "emp2",
-        employeeName: "Bob Smith",
-        type: "Sick Leave",
-        fromDate: "2023-10-15",
-        toDate: "2023-10-16",
-        reason: "Viral fever",
-        status: "Approved",
-        appliedOn: "2023-10-14",
-        managerRemarks: "Get well soon"
-    },
-    {
-        id: "leave3",
-        employeeId: "emp1",
-        employeeName: "Alice Johnson",
-        type: "Paid Leave",
-        fromDate: "2023-11-20",
-        toDate: "2023-11-25",
-        reason: "Family vacation",
-        status: "Rejected",
-        appliedOn: "2023-11-10",
-        managerRemarks: "High workload week, please reschedule"
-    }
-];
+const INITIAL_LEAVES: LeaveRequest[] = [];
 
 // Helper: Simulate delay for realistic feel
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
