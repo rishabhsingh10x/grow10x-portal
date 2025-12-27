@@ -30,11 +30,12 @@ export default function LoginPage() {
                     router.push("/employee/dashboard");
                 }
             } else {
-                setError("Invalid email or password. Please make sure your Supabase user is confirmed.");
+                // If login fails, we need to know why
+                setError("Login failed. Please check your credentials. If they are correct, ensure your account exists in BOTH 'Authentication' and 'Profiles' table in Supabase.");
                 setLoading(false);
             }
-        } catch (err) {
-            setError("Connection failed. Check your network or Supabase settings.");
+        } catch (err: any) {
+            setError(err.message || "Connection failed. Check your network or Supabase settings.");
             setLoading(false);
         }
     }
